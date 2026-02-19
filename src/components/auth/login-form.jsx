@@ -17,13 +17,13 @@ export default function LoginForm() {
     return (
         <div>
             <h1 className='text-2xl font-bold mb-4'>Iniciar sesión</h1>
-            <form action={action} className='flex flex-col gap-4'>
-                <div>
+            <form action={action} className='flex flex-col gap-6'>
+                <div className='flex flex-col gap-2'>
                     <label>Email</label>
                     <input type='email' name='email' placeholder="name@mail.com" className='w-full p-3' required />
                     <p className='text-xs text-gray-400'>Por favor, introduce un email válido.</p>
                 </div>
-                <div>
+                <div className='flex flex-col gap-2'>
                     <label>Contraseña</label>
                     <input type="password" name='password' placeholder="******" className='w-full p-3' required />
                 </div>

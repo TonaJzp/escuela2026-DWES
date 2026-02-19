@@ -2,6 +2,9 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { obtenerUsuarios, obtenerUsuarioPorId } from "@/lib/data/users"
 import UserList from "@/components/users/lista"
+import ProfileForm from "@/components/users/profile-form"
+import Modal from "@/components/modal"
+import { IconoModificar } from "@/components/icons"
 
 
 export default async function DashboardPage() {
@@ -16,7 +19,12 @@ export default async function DashboardPage() {
             <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
             <div className="border rounded p-4 bg-white shadow mb-6">
-                <h2 className="text-xl font-bold mb-2">Tu información</h2>
+                <div className="flex justify-between items-start">
+                    <h2 className="text-xl font-bold mb-2">Tu información</h2>
+                    <Modal openElement={<IconoModificar />}>
+                        <ProfileForm user={JSON.parse(JSON.stringify(usuario))} />
+                    </Modal>
+                </div>
                 <p><strong>Nombre:</strong> {usuario.name}</p>
                 <p><strong>Email:</strong> {usuario.email}</p>
                 <p><strong>Rol:</strong> {usuario.role}</p>

@@ -8,14 +8,13 @@ const errors = new Map([
     ["Default", "Error al iniciar sesión."],
 ])
 
-
 export default async function LoginPage({ searchParams }) {
     const { error } = await searchParams
 
     return (
-        <section className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <section className="flex flex-col items-center justify-center min-h-screen gap-8">
             {error && <h3 className='text-red-400'>{errors.get(error)}</h3>}
-            <div className="flex flex-col md:flex-row gap-8 border p-8 rounded bg-white shadow items-start">
+            <div className="flex flex-col md:flex-row gap-16 border p-16 rounded bg-white shadow items-start">
                 <LoginForm />
                 <OAuthForm />
             </div>
