@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelos para Auth.js
+// https://authjs.dev/reference/adapter/prisma#setup
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String?   @default("USER") //  ADMIN, USER
+  active        Boolean?  @default(true) //  true, false
+  accounts      Account[]
+}
+
+// Modelos de la aplicación Escuela 2026
+
+model Grupo {
+  id     Int    @id @default(autoincrement())
+  nombre String @unique
+  tutor  String
+  aula   String
+
+  estudiantes Estudiante[]
+}
+
+model Estudiante {
+  id               Int      @id @default(autoincrement())
+  nombre           String
+  fecha_nacimiento DateTime
+  foto             String?
+  tutor_legal      String
+
+  asignaturas Asignatura[]
+  grupoId     Int?
+  grupo       Grupo?       @relation(fields: [grupoId], references: [id])
+}
+
+model Asignatura {
+  id           Int     @id @default(autoincrement())
+  nombre       String
+  profesor     String?
+  horas_semana Int
+
+  estudiantes Estudiante[]
+}
