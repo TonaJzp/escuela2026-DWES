@@ -11,8 +11,9 @@ import useAsignaturas from '@/hooks/useAsignaturas'
 
 
 
-export default function Lista({ promesaAsignaturas }) {
+export default function Lista({ session, promesaAsignaturas }) {
     const asignaturas = use(promesaAsignaturas)
+    const isAdminSession = session?.user?.role === 'ADMIN'
 
     const {
         asignaturasFiltradas,
@@ -82,15 +83,21 @@ export default function Lista({ promesaAsignaturas }) {
                 setOrden={setOrden}
             />
 
-            <div className='flex justify-end items-center gap-4 pb-4'>
-                <Insertar />
-            </div>
+            {isAdminSession &&
+                <div className='flex justify-end items-center gap-4 pb-4'>
+                    <Insertar />
+                </div>
+            }
 
             <div className='grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-10'>
                 {asignaturasFiltradas.map((asignatura) =>
                     <Card key={asignatura.id} asignatura={asignatura}>
-                        <Editar asignatura={asignatura} />
-                        <Eliminar asignatura={asignatura} />
+                        {isAdminSession &&
+                            <>
+                                <Editar asignatura={asignatura} />
+                                <Eliminar asignatura={asignatura} />
+                            </>
+                        }
                     </Card>
                 )}
             </div>

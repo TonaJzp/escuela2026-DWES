@@ -14,16 +14,14 @@ async function Header() {
                 <Link href="/">
                     <Home />
                 </Link>
+                <Link href="/dashboard">Dashboard</Link>
                 <Link href="/grupos">Grupos</Link>
                 <Link href="/asignaturas">Asignaturas</Link>
                 <Link href="/estudiantes">Estudiantes</Link>
-                {session
-                    && <Link href="/dashboard">Dashboard</Link>
-                }
             </nav>
             <div className='flex gap-4'>
                 {session
-                    ? <form><button formAction={logout}>Logout</button></form>
+                    ? <form><button className="cursor-pointer" formAction={logout}>Logout</button></form>
                     : <Link href="/auth/login">Login</Link>
                 }
             </div>

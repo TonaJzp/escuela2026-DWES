@@ -11,12 +11,12 @@ import { IconoInsertar, IconoModificar, IconoEliminar } from '@/components/icons
 
 
 
-
-export default function Lista({ promesaEstudiantes, promesaGruposIdNombre, promesaAsignaturasIdNombre }) {
+export default function Lista({ session, promesaEstudiantes, promesaGruposIdNombre, promesaAsignaturasIdNombre }) {
 
     const estudiantes = use(promesaEstudiantes)
     const gruposIdNombre = use(promesaGruposIdNombre)
     const asignaturasIdNombre = use(promesaAsignaturasIdNombre)
+    const isAdminSession = session?.user?.role === 'ADMIN'
 
     const {
         estudiantesFiltrados,
@@ -93,15 +93,21 @@ export default function Lista({ promesaEstudiantes, promesaGruposIdNombre, prome
                 setOrden={setOrden}
             />
 
-            <div className='flex justify-end items-center gap-4 pb-4'>
-                <Insertar />
-            </div>
+            {isAdminSession &&
+                <div className='flex justify-end items-center gap-4 pb-4'>
+                    <Insertar />
+                </div>
+            }
 
             <div className='grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-10'>
                 {estudiantesFiltrados.map((estudiante) =>
                     <Card key={estudiante.id} estudiante={estudiante}>
-                        <Editar estudiante={estudiante} />
-                        <Eliminar estudiante={estudiante} />
+                        {isAdminSession &&
+                            <>
+                                <Editar estudiante={estudiante} />
+                                <Eliminar estudiante={estudiante} />
+                            </>
+                        }
                     </Card>
                 )}
             </div>

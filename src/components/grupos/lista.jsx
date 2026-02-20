@@ -10,9 +10,10 @@ import useGrupos from '@/hooks/useGrupos'
 
 
 
-export default function Lista({ promesaGrupos }) {
+export default function Lista({ session, promesaGrupos }) {
 
     const grupos = use(promesaGrupos)
+    const isAdminSession = session?.user?.role === 'ADMIN'
 
     const {
         gruposFiltrados,
@@ -82,16 +83,22 @@ export default function Lista({ promesaGrupos }) {
                 setOrden={setOrden}
             />
 
-            <div className='flex justify-end items-center gap-4 pb-4'>
-                <Insertar />
-            </div>
+            {isAdminSession &&
+                <div className='flex justify-end items-center gap-4 pb-4'>
+                    <Insertar />
+                </div>
+            }
 
 
             <div className='grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-10'>
                 {gruposFiltrados.map((grupo) =>
                     <Card key={grupo.id} grupo={grupo}>
-                        <Editar grupo={grupo} />
-                        <Eliminar grupo={grupo} />
+                        {isAdminSession &&
+                            <>
+                                <Editar grupo={grupo} />
+                                <Eliminar grupo={grupo} />
+                            </>
+                        }
                     </Card>)}
 
             </div>

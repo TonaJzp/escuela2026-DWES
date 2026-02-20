@@ -1,82 +1,126 @@
 'use client'
-
-import { useActionState, useEffect } from 'react'
-import { newUser, editUser, deleteUser } from '@/lib/actions/users'
-import { toast } from 'sonner'
-import { Trash2 } from 'lucide-react'
-
+import { RefreshCwIcon } from "lucide-react";
+import { useActionState, useEffect, useId } from "react";
+import { toast } from "sonner";
+import InputAvatar from "@/components/input-avatar";
 
 
-function RemoveButton({ user }) {
+export default function UserForm({ action, isAdminSession, user, disabled = false, labelSubmit = <span className="bg-blue-500 text-white px-4 py-2 rounded-md">Guardar</span> }) {
+    const formId = useId()
+    const [state, faction, isPending] = useActionState(action, {})
 
-    async function handleDelete() {
-        const result = await deleteUser(user)
-        if (result?.success) toast.success(result.success)
-        if (result?.error) toast.error(result.error)
-    }
-
-    return (
-        <button
-            onClick={handleDelete}
-            className='rounded bg-red-500 text-white p-2 cursor-pointer hover:bg-red-600'
-            title='Eliminar usuario'
-        >
-            <Trash2 size={16} />
-        </button>
-    )
-}
-
-
-export default function UserForm({ user }) {
-    const action = user?.id ? editUser : newUser
-    const [state, formAction, pending] = useActionState(action, {})
 
     useEffect(() => {
-        if (state?.success) toast.success(state.success)
-        if (state?.error) toast.error(typeof state.error === 'string' ? state.error : 'Error al procesar')
+        if (state?.success) {
+            toast.success(state.success)
+            document.getElementById(formId).closest('dialog')?.close() // Si el padre es un dialog, lo cerramos
+        }
+        if (state?.error) toast.error(state.error)
+        if (state?.ok) {
+            // toast(<div className="text-4xl flex justify-end text-green-600">🙂 OK</div>, { duration: 800 })
+            document.getElementById(formId).closest('dialog')?.close() // Si el padre es un dialog, lo cerramos
+        }
+
     }, [state])
 
+
+
     return (
-        <div className='border rounded p-4 bg-white shadow'>
-            <form action={formAction} className='flex flex-col gap-3'>
-                {user?.id && <input type="hidden" name="id" value={user.id} />}
-                <div>
-                    <label className='block text-sm font-medium'>Nombre</label>
-                    <input type='text' name='name' defaultValue={user?.name || ''} className='w-full p-2 border rounded' required />
+        <>
+            <form id={formId} action={faction} className="grid lg:grid-cols-[300px_1fr] gap-4">
+                <input type="hidden" name="id" defaultValue={user?.id} />
+
+                <div className="flex flex-col gap-2">
+
+                    {disabled
+                        ? <img src={user?.image || '/images/avatar-80.png'} alt="Imagen de usuario" className='h-[200px] w-full lg:h-full object-contain' />
+                        : < InputAvatar name='image' user={user} />
+                    }
+
+                    {isAdminSession
+                        ?
+                        <div className="flex items-center gap-2 self-center">
+                            <input
+                                key={`active-${user?.active}`}
+                                type="checkbox"
+                                name='active'
+                                defaultChecked={user?.active == true}
+                                disabled={disabled}
+                                id={`active-${formId}`}
+                            />
+                            <label htmlFor={`active-${formId}`} className="text-sm">
+                                {user?.active ? 'Cuenta activa' : 'Cuenta no activa'}
+                            </label>
+                        </div>
+                        : <input type="hidden" name="active" defaultValue={user?.active} />
+                    }
+
                 </div>
-                <div>
-                    <label className='block text-sm font-medium'>Email</label>
-                    <input type='email' name='email' defaultValue={user?.email || ''} className='w-full p-2 border rounded' required />
-                </div>
-                <div>
-                    <label className='block text-sm font-medium'>Contraseña</label>
-                    <input type='password' name='password' placeholder={user?.id ? '(dejar vacío para no cambiar)' : '******'} className='w-full p-2 border rounded' {...(!user?.id && { required: true })} />
-                </div>
-                <div>
-                    <label className='block text-sm font-medium'>Imagen (URL)</label>
-                    <input type='url' name='image' defaultValue={user?.image || ''} className='w-full p-2 border rounded' />
-                </div>
-                <div>
-                    <label className='block text-sm font-medium'>Rol</label>
-                    <select name='role' defaultValue={user?.role || 'USER'} className='w-full p-2 border rounded'>
-                        <option value='USER'>USER</option>
-                        <option value='ADMIN'>ADMIN</option>
-                    </select>
-                </div>
-                <div className='flex items-center gap-2'>
-                    <input type='checkbox' name='active' defaultChecked={user?.active !== false} id='active' />
-                    <label htmlFor='active' className='text-sm'>Activo</label>
-                </div>
-                <div className='flex gap-2'>
+
+                <div className="p-4 flex flex-col w-full gap-2 bg-gray-100">
+
                     <button
-                        disabled={pending}
-                        className="flex-1 px-4 py-2 bg-blue-500 text-white cursor-pointer hover:bg-blue-600 rounded disabled:bg-gray-400"
+                        type="submit"
+                        className="w-full h-12 flex justify-center items-center rounded-md hover:cursor-pointer hover:opacity-80 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                        disabled={isPending}
                     >
-                        {pending ? 'Guardando...' : (user?.id ? 'Modificar' : 'Crear usuario')}
+                        {isPending
+                            ? <RefreshCwIcon size={20} className="animate-spin" />
+                            : labelSubmit
+                        }
                     </button>
-                    {user?.id && <RemoveButton user={user} />}
+
+
+                    <input
+                        name='name'
+                        defaultValue={user?.name}
+                        placeholder="Nombre"
+                        className="appearance-none text-4xl bg-white disabled:bg-white focus:outline-none focus:border-blue-400"
+                        disabled={disabled}
+                        required
+                    />
+
+                    <input
+                        name='email'
+                        defaultValue={user?.email}
+                        placeholder="Email"
+                        className="appearance-none text-2xl bg-white disabled:bg-white focus:outline-none focus:border-blue-400"
+                        disabled={disabled}
+                        required
+                    />
+
+                    <input
+                        name='password'
+                        type='password'
+                        // defaultValue={user?.password}
+                        // placeholder="Password"
+                        placeholder='no cambiar contraseña'
+                        className="appearance-none text-2xl bg-white disabled:bg-white focus:outline-none focus:border-blue-400"
+                        disabled={disabled}
+                        required={!user}
+                    />
+
+
+                    {isAdminSession
+                        ?
+                        <select
+                            key={user?.role}
+                            name="role"
+                            defaultValue={user?.role}
+                            size={2}
+                            className="w-full text-md px-3 py-2 rounded-lg focus:outline-none bg-gray-100"
+                            disabled={disabled}
+                            required
+                        >
+                            <option value='USER' className="p-2 text-center text-xl"> USER </option>
+                            <option value='ADMIN' className="p-2 text-center text-xl"> ADMIN </option>
+                        </select>
+                        :
+                        <input type="hidden" name="role" defaultValue={user?.role} />
+                    }
                 </div>
             </form>
-        </div>
+
+        </>
     )
 }

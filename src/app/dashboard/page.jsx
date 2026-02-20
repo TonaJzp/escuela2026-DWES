@@ -1,10 +1,11 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { obtenerUsuarios, obtenerUsuarioPorId } from "@/lib/data/users"
-import UserList from "@/components/users/lista"
-import ProfileForm from "@/components/users/profile-form"
-import Modal from "@/components/modal"
 import { IconoModificar } from "@/components/icons"
+import { editUser } from "@/lib/actions/users"
+import UserForm from "@/components/users/form"
+import Modal from "@/components/modal"
+import UserList from "@/components/users/lista"
 
 
 export default async function DashboardPage() {
@@ -12,35 +13,55 @@ export default async function DashboardPage() {
 
     if (!session) redirect('/auth/login')
 
-    const usuario = await obtenerUsuarioPorId(session.user.id)
+    const isAdminSession = session.user?.role === 'ADMIN'
 
     return (
-        <section className="p-4">
-            <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+        <div>
+            <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
 
-            <div className="border rounded p-4 bg-white shadow mb-6">
-                <div className="flex justify-between items-start">
-                    <h2 className="text-xl font-bold mb-2">Tu información</h2>
-                    <Modal openElement={<IconoModificar />}>
-                        <ProfileForm user={JSON.parse(JSON.stringify(usuario))} />
-                    </Modal>
-                </div>
-                <p><strong>Nombre:</strong> {usuario.name}</p>
-                <p><strong>Email:</strong> {usuario.email}</p>
-                <p><strong>Rol:</strong> {usuario.role}</p>
-            </div>
+            <UserInfo session={session} />
 
-            {session.user.role === 'ADMIN' && (
-                <div className="border rounded p-4 bg-white shadow">
-                    <UserListSection />
-                </div>
-            )}
-        </section>
+            {isAdminSession &&
+                <>
+                    <h1 className="text-xl font-bold mt-15">Lista de usuarios</h1>
+                    <UserListSection session={session} />
+                </>
+            }
+        </div >
     )
 }
 
 
-async function UserListSection() {
+
+
+async function UserInfo({ session }) {
+
+    const usuario = await obtenerUsuarioPorId(session.user.id)
+    const isAdminSession = session.user.role === 'ADMIN'
+
+    return (
+        <div className="grid md:grid-cols-[160px_auto] gap-2">
+
+            <img src={usuario?.image || '/images/avatar-80.png'} className="size-36" alt="Imagen de usuario" />
+
+            <div className="flex flex-col gap-1">
+                <div className="flex gap-2 items-center">
+                    <p className="font-bold">{usuario.name}</p>
+                    <Modal openElement={<IconoModificar />}>
+                        <UserForm action={editUser} isAdminSession={isAdminSession} user={usuario} labelSubmit={<span className="bg-indigo-500 text-white px-4 py-2 rounded-md">Modificar</span>} />
+                    </Modal>
+                </div>
+                <p>{usuario.email}</p>
+                <p>{usuario.role}</p>
+            </div>
+        </div>
+
+    )
+}
+
+
+
+async function UserListSection({ session }) {
     const users = await obtenerUsuarios()
-    return <UserList users={users} />
+    return <UserList session={session} users={JSON.parse(JSON.stringify(users))} />
 }

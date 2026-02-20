@@ -2,10 +2,12 @@ import ListaGrupos from '@/components/grupos/lista'
 import { obtenerGrupos } from '@/lib/data'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { auth } from '@/auth'
 
 
-export default function PaginaGrupos() {
+export default async function PaginaGrupos() {
 
+    const session = await auth()
     const promesaGrupos = obtenerGrupos()  // Promesa, no usamos AWAIT
 
     return (
@@ -21,6 +23,7 @@ export default function PaginaGrupos() {
 
             <Suspense fallback={<p className='text-2xl text-blue-400'>Cargando...</p>}>
                 <ListaGrupos
+                    session={session}
                     promesaGrupos={promesaGrupos}
                 />
             </Suspense>

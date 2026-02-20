@@ -25,12 +25,16 @@ async function register(prevState, formData) {
     // Encriptamos password 
     const hashedPassword = await bcrypt.hash(password, 10)
 
+    const avatarIndex = Math.floor(Math.random() * 80)
+    const image = `/images/avatar-${String(avatarIndex).padStart(2, '0')}.png`
+
     // Guardamos credenciales en base datos
     await prisma.user.create({
         data: {
             name,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            image
         }
     })
 
@@ -74,7 +78,7 @@ async function login(prevState, formData) {
         await signIn('credentials',
             {
                 email, password,
-                redirectTo: globalThis.callbackUrl
+                redirectTo: '/dashboard'
             })
         return { success: "Inicio de sesión correcto" }
     } else {
